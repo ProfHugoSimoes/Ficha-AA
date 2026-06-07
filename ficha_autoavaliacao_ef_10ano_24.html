@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha de Autoavaliação — Educação Física 10º Ano</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f4f4f2; color: #1a1a1a; min-height: 100vh; padding: 1.5rem; }
+.app { max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; align-items: flex-start; }
+.app-main { flex: 1; min-width: 0; }
+.nota-final-panel {
+  width: 220px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: calc(100vh - 3rem);
+}
+.nota-final-panel .pnf-title { font-size: 18px; font-weight: 800; color: #1a1a1a; display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; }
+.nota-final-panel .pnf-title .section-badge { width: 30px; height: 30px; font-size: 15px; }
+.nota-final-panel .final-card { background: #eff6ff; border-radius: 16px; padding: 1.5rem 1rem; text-align: center; border: 2px solid #bfdbfe; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.nota-final-panel .final-label { font-size: 15px; color: #1d4ed8; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.nota-final-panel .final-score { font-size: 80px; font-weight: 800; color: #1d4ed8; line-height: 1; }
+.nota-final-panel .final-sub { font-size: 11px; color: #888; margin-top: 8px; }
+.nota-final-panel .note-text { font-size: 10px; color: #888; font-style: italic; text-align: center; }
+.header { text-align: center; margin-bottom: 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #e0e0dc; padding: 1.25rem; }
+.header h1 { font-size: 20px; font-weight: 600; color: #1a1a1a; }
+.header p { font-size: 13px; color: #666; margin-top: 4px; }
+.form-row { display: flex; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
+.form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+.form-group label { font-size: 12px; color: #666; font-weight: 500; }
+.form-group input { padding: 0 10px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-size: 14px; outline: none; height: 31px; box-sizing: border-box; }
+.form-group input:focus { border-color: #3b82f6; }
+select { padding: 0 4px; border-radius: 6px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-size: 12px; width: 100%; outline: none; cursor: pointer; height: 31px; box-sizing: border-box; }
+.section-card { background: #fff; border: 1px solid #e0e0dc; border-radius: 12px; padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
+.section-title { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 8px; }
+.section-badge { background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.subsection-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; border-left: 3px solid #3b82f6; padding-left: 8px; }
+.col-header { font-size: 10px; color: #999; text-align: center; line-height: 1.3; }
+
+select:focus { border-color: #3b82f6; }
+.total-box { background: #f8f8f6; border-radius: 8px; padding: 8px 12px; text-align: center; border: 1px solid #eee; }
+.total-label { font-size: 11px; color: #888; margin-bottom: 2px; }
+.total-value { font-size: 22px; font-weight: 600; color: #1d4ed8; }
+.final-card { background: #eff6ff; border-radius: 12px; padding: 1.25rem; text-align: center; border: 1px solid #bfdbfe; }
+.final-label { font-size: 13px; color: #555; margin-bottom: 4px; font-weight: 500; }
+.final-score { font-size: 52px; font-weight: 700; color: #1d4ed8; line-height: 1; }
+.final-sub { font-size: 12px; color: #888; margin-top: 4px; }
+.radio-group { display: flex; flex-direction: column; gap: 5px; }
+.radio-opt { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e5e5; cursor: pointer; font-size: 13px; color: #1a1a1a; transition: background 0.15s, border-color 0.15s; }
+.radio-opt:hover { background: #f0f4ff; border-color: #93c5fd; }
+.radio-opt.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+.radio-opt input { margin-top: 2px; flex-shrink: 0; accent-color: #3b82f6; }
+.badge-pts { font-size: 11px; background: #f1f1ee; border-radius: 10px; padding: 2px 8px; margin-left: auto; color: #666; white-space: nowrap; }
+.radio-opt.selected .badge-pts { background: #dbeafe; color: #1d4ed8; }
+.results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.note-text { font-size: 12px; color: #888; margin-top: 8px; font-style: italic; text-align: center; }
+hr.divider { border: none; border-top: 1px solid #f0f0ec; margin: 0.85rem 0; }
+.activity-input { width: 100%; padding: 4px 8px; border-radius: 6px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-size: 12px; outline: none; }
+.activity-input:focus { border-color: #3b82f6; }
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.active { display:flex; }
+.modal-box { background:#fff; border-radius:16px; padding:2rem; max-width:420px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+.modal-box h3 { font-size:18px; font-weight:700; margin-bottom:8px; color:#1a1a1a; }
+.modal-box p { font-size:13px; color:#666; margin-bottom:1.5rem; }
+.modal-btn { padding:12px 24px; border-radius:10px; border:none; font-size:14px; font-weight:600; cursor:pointer; }
+.modal-btn-ok { background:#1d4ed8; color:#fff; margin-right:8px; }
+.modal-btn-cancel { background:#f0f0ec; color:#666; }
+@media print {
+  body { background: white; padding: 0; }
+  .section-card { break-inside: avoid; }
+}
+@media(max-width:700px){
+  .app { flex-direction: column; }
+  .nota-final-panel {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    gap: 10px;
+    order: 99;
+    margin-top: 12px;
+  }
+  .nota-final-panel .final-card { flex: 1; padding: 1rem 0.5rem; }
+  .nota-final-panel .final-score { font-size: 52px; }
+  .nota-final-panel .pnf-title { display: none; }
+}
+
+/* ── MOBILE COMPACTO (≤ 480px) ─────────────────────────────── */
+@media(max-width:480px){
+  body { padding: 0.6rem; }
+
+  /* Header — logo + título em coluna */
+  .header { flex-direction: column !important; align-items: center !important;
+            gap: 8px !important; padding: 0.9rem 0.8rem !important; }
+  .header img { height: 52px !important; }
+  .header h1 { font-size: 18px !important; }
+  .header h2 { font-size: 15px !important; }
+  .header p  { font-size: 12px !important; }
+
+  /* Campos do formulário — todos em coluna */
+  .form-row { flex-direction: column; gap: 8px; }
+  .form-group { min-width: 0 !important; flex: none !important; }
+  .form-group input,
+  .form-group select,
+  select { font-size: 13px; height: 34px; }
+
+  /* Cards de secção */
+  .section-card { padding: 0.75rem 0.7rem; }
+  .section-title { font-size: 11px; gap: 6px; }
+  .section-badge { width: 18px; height: 18px; font-size: 10px; }
+  .subsection-title { font-size: 12px; }
+
+  /* Grelhas 3 colunas → compactas em mobile */
+  .row-3col {
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 4px !important;
+  }
+
+  /* Selects dentro das linhas de actividade */
+  .section-card select { font-size: 11px; padding: 0 3px; height: 30px; }
+
+  /* Inputs numéricos (questão de aula) */
+  .section-card input[type="number"] {
+    font-size: 13px !important; height: 30px !important; padding: 0 6px !important;
+  }
+
+  /* Cabeçalhos de coluna */
+  .col-header { font-size: 9px; }
+
+  /* Totais */
+  .total-box { padding: 6px 8px; }
+  .total-label { font-size: 10px; }
+  .total-value { font-size: 18px; }
+
+  /* grid-2 mais compacto */
+  .grid-2 { gap: 6px; }
+
+  /* Texto informativo pequeno */
+  #questao-ref-line { font-size: 10px; }
+
+  /* Quadro de conversão — botão */
+  #btn-quadro span:nth-child(2) { font-size: 10px; letter-spacing: 0; }
+
+  /* Radio options — texto menor */
+  .radio-opt { font-size: 12px; padding: 6px 8px; }
+  .badge-pts { font-size: 10px; padding: 2px 5px; }
+
+  /* results-grid → 2 colunas */
+  .results-grid { grid-template-columns: repeat(2,1fr); gap: 6px; }
+
+  /* Botão de envio */
+  #btn-enviar { font-size: 13px !important; padding: 12px 10px !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="app-main">
+
+<div class="header" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:1.5rem 2rem;">
+  <img src="data:image/png;base64,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" alt="Logo" style="height:80px;width:auto;flex-shrink:0;">
+  <div style="flex:1;text-align:center;">
+    <h1 style="font-size:28px;font-weight:700;color:#1a1a1a;line-height:1.2;">Ficha de Autoavaliação</h1>
+    <h2 style="font-size:22px;font-weight:600;color:#1d4ed8;margin-top:4px;">Educação Física</h2>
+    <p style="font-size:15px;color:#666;margin-top:6px;font-weight:500;">Escola Secundária Du Bocage</p>
+  </div>
+  <img src="data:image/png;base64,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" alt="Logo" style="height:80px;width:auto;flex-shrink:0;">
+</div>
+
+
+<!-- Modal de confirmação -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <div style="font-size:40px;margin-bottom:12px;">📤</div>
+    <h3>Enviar autoavaliação?</h3>
+    <p id="modal-msg">A autoavaliação será enviada em PDF para o email do professor.</p>
+    <div>
+      <button class="modal-btn modal-btn-ok" id="modal-confirmar">Confirmar envio</button>
+      <button class="modal-btn modal-btn-cancel" onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="form-row">
+  <div class="form-group" style="flex:3">
+    <label>Nome</label>
+    <input type="text" id="nome" placeholder="Nome do aluno">
+  </div>
+  <div class="form-group" style="flex:1">
+    <label>Ano</label>
+    <select id="ano">
+      <option value="">— Ano —</option>
+      <option value="7º">7º</option>
+      <option value="8º">8º</option>
+      <option value="9º">9º</option>
+      <option value="10º" selected>10º</option>
+      <option value="11º">11º</option>
+      <option value="12º">12º</option>
+    </select>
+  </div>
+  <div class="form-group" style="flex:1">
+    <label>Turma</label>
+    <select id="turma">
+      <option value="">— Turma —</option>
+      <script>
+        (function(){
+          const s = document.currentScript.parentElement;
+          for(let i=0;i<15;i++){
+            const l=String.fromCharCode(65+i);
+            const o=document.createElement('option');
+            o.value=l; o.textContent=l; s.appendChild(o);
+          }
+        })();
+      </script>
+    </select>
+  </div>
+  <div class="form-group" style="flex:1">
+    <label>Ano letivo</label>
+    <select id="anoletivo"></select>
+    <script>
+      (function(){
+        const sel = document.getElementById('anoletivo');
+        const baseYear = new Date().getFullYear();
+        sel.innerHTML = '<option value="">— Selecionar —</option>';
+        for(let y = baseYear; y <= baseYear + 5; y++){
+          const label = y + '/' + (y+1);
+          const opt = document.createElement('option');
+          opt.value = label;
+          opt.textContent = label;
+          if(y === baseYear) opt.selected = true;
+          sel.appendChild(opt);
+        }
+      })();
+    </script>
+  </div>
+  <div class="form-group" style="flex:1">
+    <label>Data</label>
+    <input type="date" id="data">
+  </div>
+</div>
+
+<!-- SECÇÃO 1.1 -->
+<div class="section-card">
+  <div class="section-title"><span class="section-badge">1.1</span> Domínio dos Conhecimentos e Capacidades — Aptidão Física</div>
+  <div class="row-3col" style="display:grid;grid-template-columns:1fr 220px 220px;gap:6px;margin-bottom:4px">
+    <div></div>
+    <div class="col-header">1º Semestre</div>
+    <div class="col-header">2º Semestre</div>
+  </div>
+  <div id="fitescola-rows"></div>
+  <hr class="divider">
+  <div class="grid-2">
+    <div class="total-box"><div class="total-label">Total Pontos 1º Semestre (máx. 5)</div><div class="total-value" id="total2-1s">0</div></div>
+    <div class="total-box"><div class="total-label">Total Pontos 2º Semestre (máx. 5)</div><div class="total-value" id="total2-2s">0</div></div>
+  </div>
+  <div style="margin-top:10px">
+    <div class="total-box" style="background:#eff6ff;border-color:#bfdbfe">
+      <div class="total-label">Total Pontos Final de Ano Letivo — Média dos Totais dos 2 semestres (máx. 5)</div>
+      <div class="total-value" id="total2-media" style="color:#1d4ed8">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECÇÃO 1.2 -->
+<div class="section-card">
+  <div class="section-title"><span class="section-badge">1.2</span> Domínio dos Conhecimentos e Capacidades — Atividades Físicas</div>
+  <p id="sec2-rules-note" style="font-size:11px;color:#888;margin-bottom:12px;font-style:italic;background:#f8f8f6;border-radius:6px;padding:6px 10px;border:1px solid #eee;"></p>
+
+  <div style="margin-bottom:1rem">
+    <div class="subsection-title">Jogos Desportivos Coletivos (JDC)</div>
+    <div class="row-3col" style="display:grid;grid-template-columns:1fr 220px 220px;gap:6px;margin-bottom:4px">
+      <div></div>
+      <div class="col-header">1º Semestre</div>
+      <div class="col-header">2º Semestre</div>
+    </div>
+    <div id="jdc-rows"></div>
+  </div>
+
+  <hr class="divider">
+
+  <div style="margin-bottom:1rem">
+    <div class="subsection-title">Ginástica</div>
+    <div class="row-3col" style="display:grid;grid-template-columns:1fr 220px 220px;gap:6px;margin-bottom:4px">
+      <div></div>
+      <div class="col-header">1º Semestre</div>
+      <div class="col-header">2º Semestre</div>
+    </div>
+    <div id="gad-rows"></div>
+  </div>
+
+  <hr class="divider">
+
+  <div style="margin-bottom:1rem">
+    <div class="subsection-title">Atividades Rítmicas e Expressivas</div>
+    <div class="row-3col" style="display:grid;grid-template-columns:1fr 220px 220px;gap:6px;margin-bottom:4px">
+      <div></div>
+      <div class="col-header">1º Semestre</div>
+      <div class="col-header">2º Semestre</div>
+    </div>
+    <div id="are-rows"></div>
+  </div>
+
+  <hr class="divider">
+
+  <div style="margin-bottom:1rem">
+    <div class="subsection-title">Outras</div>
+    <div class="row-3col" style="display:grid;grid-template-columns:1fr 220px 220px;gap:6px;margin-bottom:4px">
+      <div></div>
+      <div class="col-header">1º Semestre</div>
+      <div class="col-header">2º Semestre</div>
+    </div>
+    <div id="outras-rows"></div>
+  </div>
+
+  <hr class="divider">
+  <div class="grid-2">
+    <div class="total-box"><div class="total-label" id="label-total1-1s">Total Pontos 1º Semestre</div><div class="total-value" id="total1-1s">0</div></div>
+    <div class="total-box"><div class="total-label" id="label-total1-2s">Total Pontos 2º Semestre</div><div class="total-value" id="total1-2s">0</div></div>
+  </div>
+  <div style="margin-top:10px">
+    <div class="total-box" style="background:#eff6ff;border-color:#bfdbfe">
+      <div class="total-label" id="label-total1-nfal">Total Pontos Final de Ano Letivo</div>
+      <div class="total-value" id="total1-nfal" style="color:#1d4ed8">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECÇÃO 1.3 -->
+<div class="section-card">
+  <div class="section-title"><span class="section-badge">1.3</span> Domínio dos Conhecimentos e Capacidades — Questão Aula</div>
+  <div class="row-3col" style="display:grid;grid-template-columns:1fr 220px 220px;gap:6px;margin-bottom:4px">
+    <div></div>
+    <div class="col-header">1º Semestre</div>
+    <div class="col-header">2º Semestre</div>
+  </div>
+  <div class="row-3col" style="display:grid;grid-template-columns:1fr 220px 220px;gap:6px;align-items:center;margin-bottom:6px">
+    <div id="questao-nota-label" style="font-size:13px">Nota obtida (0–20)</div>
+    <input type="number" id="questao-nota-s1" min="0" max="20" step="0.1" placeholder="—"
+      style="padding:0 10px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;font-size:14px;outline:none;height:31px;box-sizing:border-box;width:100%"
+      oninput="calcAll()">
+    <input type="number" id="questao-nota-s2" min="0" max="20" step="0.1" placeholder="—"
+      style="padding:0 10px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;font-size:14px;outline:none;height:31px;box-sizing:border-box;width:100%"
+      oninput="calcAll()">
+  </div>
+  <div class="row-3col" style="display:grid;grid-template-columns:1fr 220px 220px;gap:6px;align-items:center;margin-bottom:4px">
+    <div style="font-size:11px;color:#888;font-style:italic">Pontos atribuídos</div>
+    <div id="questao-pts-s1" style="text-align:center;font-size:13px;font-weight:600;color:#1d4ed8">—</div>
+    <div id="questao-pts-s2" style="text-align:center;font-size:13px;font-weight:600;color:#1d4ed8">—</div>
+  </div>
+  <div id="questao-ref-line" style="font-size:11px;color:#aaa;font-style:italic;margin-bottom:8px">≥17,5 → 1,5 pts &nbsp;|&nbsp; ≥13,5 → 1 pt &nbsp;|&nbsp; ≥9,5 → 0,5 pts &nbsp;|&nbsp; &lt;9,5 → 0 pts</div>
+  <hr class="divider">
+  <div class="grid-2" style="margin-bottom:10px">
+    <div class="total-box"><div class="total-label">Total Pontos 1º Semestre (máx. 1.5)</div><div class="total-value" id="total3-1s">0</div></div>
+    <div class="total-box"><div class="total-label">Total Pontos 2º Semestre (máx. 1.5)</div><div class="total-value" id="total3-2s">0</div></div>
+  </div>
+  <div class="total-box" style="background:#eff6ff;border-color:#bfdbfe">
+    <div class="total-label">Total Pontos Final de Ano Letivo — Média dos Totais dos 2 semestres (máx. 1,5)</div>
+    <div class="total-value" id="total3-media" style="color:#1d4ed8">—</div>
+  </div>
+</div>
+
+<!-- TOTAIS INTERMÉDIOS -->
+<div class="section-card">
+  <div class="section-title">Conhecimentos e Capacidades — Resumo <span style="font-size:11px;font-weight:400">(Aptidão Física, At. Físicas e Questão Aula) — 85%</span></div>
+  <div class="grid-2" style="margin-bottom:10px">
+    <div class="total-box">
+      <div class="total-label" id="label-total4-1s">Total Pontos 1º Semestre — Ap. Física, At. Físicas e Questão</div>
+      <div class="total-value" id="total4-1s">0</div>
+    </div>
+    <div class="total-box">
+      <div class="total-label" id="label-total4-2s">Total Pontos 2º Semestre — Ap. Física, At. Físicas e Questão</div>
+      <div class="total-value" id="total4-2s">0</div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="total-box" style="background:#d1fae5;border-color:#065f46">
+      <div class="total-label" style="font-size:14px;font-weight:700;color:#1a1a1a;">Nota Conhecimentos e Capacidades 1º Semestre</div>
+      <div class="total-value" id="total5-1s" style="color:#065f46">—</div>
+    </div>
+    <div class="total-box" style="background:#d1fae5;border-color:#065f46">
+      <div class="total-label" style="font-size:14px;font-weight:700;color:#1a1a1a;">Nota Conhecimentos e Capacidades — Final de Ano Letivo</div>
+      <div class="total-value" id="total5-2s" style="color:#065f46">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUADRO INFORMATIVO DE CONVERSÃO DE PONTOS -->
+<div style="background:#fff;border:1px solid #e0e0dc;border-radius:12px;margin-bottom:1rem;overflow:hidden;">
+  <button onclick="toggleQuadro()" id="btn-quadro" style="width:100%;background:none;border:none;padding:0.85rem 1.25rem;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left;">
+    <span style="background:#dbeafe;color:#1d4ed8;font-size:12px;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">ℹ</span>
+    <span style="font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.06em;flex:1;">Tabela de Conversão de Pontos em Nota Final dos Conhecimentos e Capacidades <span style="font-weight:400;text-transform:none;">(85% da Nota Final de Semestre)</span></span>
+    <span id="quadro-chevron" style="font-size:14px;color:#3b82f6;transition:transform 0.2s;display:inline-block;">▶</span>
+  </button>
+  <div id="quadro-body" style="display:none;padding:0 1.25rem 1.25rem;">
+
+  <!-- 10º/11º/12º Ano -->
+  <div style="margin-bottom:1.5rem;">
+    <p style="font-size:12px;font-weight:600;color:#1a1a1a;margin-bottom:0.6rem;border-left:3px solid #3b82f6;padding-left:8px;">10º, 11º e 12º Ano</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <p style="font-size:11px;font-weight:600;color:#1d4ed8;text-align:center;margin-bottom:4px;background:#eff6ff;border-radius:6px;padding:4px;">1º Semestre</p>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead><tr style="background:#f1f5f9;">
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">10º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">11º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">12º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#1d4ed8;font-weight:700;">Final</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">15</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">20</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">19</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">18</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">17</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">10</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">16</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">10</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">15</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">10</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">14</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">8</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">13</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">12</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">11</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">4,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">10</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">4</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">9</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">8</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">7</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">1,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">6</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">1</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">1,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">≤ 5</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:600;color:#1d4ed8;text-align:center;margin-bottom:4px;background:#eff6ff;border-radius:6px;padding:4px;">2º Semestre</p>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead><tr style="background:#f1f5f9;">
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">10º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">11º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">12º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#1d4ed8;font-weight:700;">Final</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">20</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">20,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">21</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">20</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">19</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">19,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">20</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">19</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">17,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">18</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">18,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">18</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">15,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">16</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">17,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">17</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">15</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">15,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">17</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">16</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">15</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">16</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">15</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">15</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">14</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">13</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">10,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">12</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">10</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">11</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">10,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">10</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">8,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">9</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">8,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">8</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">7</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">4,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">6</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">4,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#1d4ed8;">≤ 5</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid #f0f0ec;margin:1rem 0;">
+
+  <!-- 7º/8º/9º Ano -->
+  <div>
+    <p style="font-size:12px;font-weight:600;color:#1a1a1a;margin-bottom:0.6rem;border-left:3px solid #10b981;padding-left:8px;">7º, 8º e 9º Ano</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <p style="font-size:11px;font-weight:600;color:#065f46;text-align:center;margin-bottom:4px;background:#ecfdf5;border-radius:6px;padding:4px;">1º Semestre</p>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead><tr style="background:#f1f5f9;">
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">7º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">8º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">9º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#065f46;font-weight:700;">Final</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">95-100%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">10,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">13</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">90-94%</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">8</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">10,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">81-89%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">8</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">70-80%</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">4</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">61-69%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">4</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">4,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">50-60%</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">40-49%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">3</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">30-39%</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">1,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">2,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">20-29%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">1</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">≤1,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">≤2</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">0-19%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:600;color:#065f46;text-align:center;margin-bottom:4px;background:#ecfdf5;border-radius:6px;padding:4px;">2º Semestre</p>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead><tr style="background:#f1f5f9;">
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">7º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">8º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#475569;font-weight:600;">9º Ano</th>
+            <th style="padding:5px 6px;border:1px solid #e2e8f0;text-align:center;color:#065f46;font-weight:700;">Final</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">16</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">17</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">95-100%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">15</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">16,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">90-94%</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">81-89%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">11</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">12</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">14</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">70-80%</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">61-69%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">8,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">9</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">50-60%</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">8</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">40-49%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">30-39%</td></tr>
+            <tr><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">4,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">6</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">7</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">20-29%</td></tr>
+            <tr style="background:#f8fafc;"><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">≤4</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">≤5,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;">≤6,5</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center;font-weight:600;color:#065f46;">0-19%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  </div><!-- /quadro-body -->
+</div><!-- /quadro card -->
+
+<!-- SECÇÃO 2 -->
+<div class="section-card">
+  <div class="section-title"><span class="section-badge">2</span> Atitudes e Valores <span style="font-size:11px;font-weight:400">(15%)</span></div>
+
+  <div style="margin-bottom:1rem">
+    <div class="subsection-title" style="margin-bottom:10px">Responsabilidade e integridade</div>
+    <div style="display:grid;grid-template-columns:1fr 90px 90px;gap:6px;margin-bottom:6px;align-items:center">
+      <div></div>
+      <div class="col-header">1º Sem.</div>
+      <div class="col-header">2º Sem.</div>
+    </div>
+    <div id="resp-rows"></div>
+  </div>
+
+  <hr class="divider">
+
+  <div style="margin-bottom:0.5rem">
+    <div class="subsection-title" style="margin-bottom:10px">Exigência e excelência</div>
+    <div style="display:grid;grid-template-columns:1fr 90px 90px;gap:6px;margin-bottom:6px;align-items:center">
+      <div></div>
+      <div class="col-header">1º Sem.</div>
+      <div class="col-header">2º Sem.</div>
+    </div>
+    <div id="exig-rows"></div>
+  </div>
+
+  <hr class="divider">
+  <div class="grid-2" style="margin-bottom:10px">
+    <div class="total-box" style="background:#d1fae5;border-color:#065f46"><div class="total-label" style="font-size:14px;font-weight:700;">Nota 1º Semestre</div><div class="total-value" id="total7-1s" style="color:#065f46">0</div></div>
+    <div class="total-box"><div class="total-label">Nota 2º Semestre</div><div class="total-value" id="total7-2s">0</div></div>
+  </div>
+  <div class="total-box" style="background:#d1fae5;border-color:#065f46">
+    <div class="total-label" style="font-size:14px;font-weight:700;">Nota Final de Ano Letivo Atitudes e Valores — Média dos Totais dos 2 semestres</div>
+    <div class="total-value" id="total8-media" style="color:#065f46">—</div>
+  </div>
+</div>
+
+
+</div><!-- /app-main -->
+
+<!-- PAINEL FIXO NOTA FINAL -->
+<div class="nota-final-panel">
+  <div class="final-card" style="background:#d1fae5;border:2px solid #065f46">
+    <div class="final-label" style="color:#065f46;">AUTOAVALIAÇÃO 1º SEMESTRE</div>
+    <div class="final-score" id="final-1s" style="color:#065f46">—</div>
+    <div class="final-sub" id="final-sub-1s">valores (0–20)</div>
+  </div>
+  <div class="final-card" style="background:#d1fae5;border:2px solid #065f46">
+    <div class="final-label" style="color:#065f46;">AUTOAVALIAÇÃO 2º SEMESTRE<br><span style="font-size:11px;font-weight:400;color:#065f46;">(Final de Ano Letivo)</span></div>
+    <div class="final-score" id="final-2s" style="color:#065f46">—</div>
+    <div class="final-sub" id="final-sub-2s">valores (0–20)</div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+
+<script>
+const jdcActivities = ['Andebol','Basquetebol','Futebol','Voleibol'];
+const gadActivities = ['Ginástica'];
+const areActivities = ['Dança'];
+const outrasActivities = ['Atletismo','Badminton','Corfebol','Hóquei em Campo/Floorbol','Orientação','Rugby','Softbol/Basebol','Ténis de Mesa','Ultimate Frisbee'];
+const fitescolaTests = [
+  'Vai-Vem (resistência aeróbia)',
+  'Abdominais (força resistente abdominal)',
+  'Flexões de braços (força resistente superior)',
+  'Senta e alcança (flexibilidade)',
+  'Agilidade/impulsão horizontal'
+];
+const ieaOpts = [{val:3,label:'A — Avançado (Muito Bom)'},{val:2,label:'E — Elementar (Bom)'},{val:1,label:'I — Introdução (Razoável)'}];
+
+function buildActivityRow(container, activity, prefix, showEditable) {
+  const row = document.createElement('div');
+  row.className='row-3col';
+  row.style.cssText='display:grid;grid-template-columns:1fr 220px 220px;gap:6px;align-items:center;margin-bottom:6px';
+  const lbl = document.createElement('div');
+  lbl.style.fontSize='13px';
+  if(showEditable && !activity){
+    const inp = document.createElement('input');
+    inp.className='activity-input';
+    inp.placeholder='Outra atividade';
+    lbl.appendChild(inp);
+  } else { lbl.textContent = activity; }
+  row.appendChild(lbl);
+  for(let s=0;s<2;s++){
+    const sel = document.createElement('select');
+    sel.id=`${prefix}-s${s+1}`;
+    sel.innerHTML='<option value="0">—</option>';
+    ieaOpts.forEach(o=>{ const opt=document.createElement('option'); opt.value=o.val; opt.textContent=o.label; sel.appendChild(opt); });
+    sel.addEventListener('change', calcAll);
+    row.appendChild(sel);
+  }
+  container.appendChild(row);
+}
+
+function buildFitescolaRow(container, test, prefix) {
+  const row = document.createElement('div');
+  row.className='row-3col';
+  row.style.cssText='display:grid;grid-template-columns:1fr 220px 220px;gap:6px;align-items:center;margin-bottom:6px';
+  const lbl = document.createElement('div');
+  lbl.style.fontSize='13px';
+  lbl.textContent = test;
+  row.appendChild(lbl);
+  for(let s=0;s<2;s++){
+    const sel = document.createElement('select');
+    sel.id=`fit-${prefix}-s${s+1}`;
+    sel.innerHTML='<option value="">—</option><option value="0">PM — Precisa Melhorar</option><option value="0.5">ZS — Zona saudável</option><option value="1">PA — Perfil Atlético</option>';
+    sel.addEventListener('change', calcAll);
+    row.appendChild(sel);
+  }
+  container.appendChild(row);
+}
+
+function buildRadioGroup(containerId, options, prefix, onChange) {
+  const c = document.getElementById(containerId);
+  options.forEach((opt,i) => {
+    const div = document.createElement('div');
+    div.className='radio-opt';
+    div.innerHTML=`<input type="radio" name="${prefix}" value="${opt.val}" id="${prefix}-${i}"> <label for="${prefix}-${i}" style="cursor:pointer;flex:1">${opt.label}</label><span class="badge-pts">${opt.val} pts</span>`;
+    div.querySelector('input').addEventListener('change', () => {
+      c.querySelectorAll('.radio-opt').forEach(d=>d.classList.remove('selected'));
+      div.classList.add('selected');
+      onChange();
+    });
+    div.addEventListener('click', () => div.querySelector('input').click());
+    c.appendChild(div);
+  });
+}
+
+const questaoOpts=[{val:1.5,label:'≥ 17,5'},{val:1,label:'≥ 13,5 e < 17,5'},{val:0.5,label:'≥ 9,5 e < 13,5'},{val:0,label:'< 9,4'}];
+const respOptsBase=[
+  {label:'RESPEITA SEMPRE as Regras e os Outros'},
+  {label:'QUASE SEMPRE RESPEITA as Regras e os Outros'},
+  {label:'Às vezes respeita as Regras e os Outros'},
+  {label:'RARAMENTE RESPEITA as Regras e os Outros'}
+];
+const exigOptsBase=[
+  {label:'TEM SEMPRE uma Atitude DEDICADA E APLICADA'},
+  {label:'QUASE SEMPRE tem uma Atitude DEDICADA E APLICADA'},
+  {label:'ÀS VEZES tem uma Atitude DEDICADA E APLICADA'},
+  {label:'RARAMENTE tem uma Atitude DEDICADA E APLICADA'}
+];
+const atVals789  = [50, 40, 30, 10];
+const atValsOther= [10,  8,  6,  2];
+
+function getAtOpts(baseOpts) {
+  const ano = document.getElementById('ano').value;
+  const vals = (ano==='7º'||ano==='8º'||ano==='9º') ? atVals789 : atValsOther;
+  return baseOpts.map((o,i)=>({val:vals[i], label:o.label}));
+}
+
+function rebuildAtitudes() {
+  ['resp-rows','exig-rows'].forEach(id => document.getElementById(id).innerHTML='');
+  buildAtitudesRows('resp-rows', getAtOpts(respOptsBase), 'resp');
+  buildAtitudesRows('exig-rows', getAtOpts(exigOptsBase), 'exig');
+}
+
+function buildAtitudesRows(containerId, opts, groupPrefix) {
+  const container = document.getElementById(containerId);
+  opts.forEach((opt, i) => {
+    const row = document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:1fr 90px 90px;gap:6px;align-items:center;padding:7px 10px;border-radius:8px;margin-bottom:4px;border:1px solid #e5e5e5;font-size:13px;';
+    row.innerHTML=`<span>${opt.label}</span>
+      <div style="text-align:center"><input type="radio" name="${groupPrefix}-s1" value="${opt.val}" style="accent-color:#3b82f6;width:18px;height:18px;cursor:pointer"></div>
+      <div style="text-align:center"><input type="radio" name="${groupPrefix}-s2" value="${opt.val}" style="accent-color:#3b82f6;width:18px;height:18px;cursor:pointer"></div>`;
+    row.querySelectorAll('input[type=radio]').forEach(inp => inp.addEventListener('change', () => {
+      // highlight selected row per group+sem
+      container.querySelectorAll(`[data-sem="${inp.name}"]`).forEach(r=>r.style.background='');
+      row.dataset.sem=inp.name;
+      calcAll();
+    }));
+    container.appendChild(row);
+  });
+}
+
+function getRadioAtVal(prefix) { const el=document.querySelector(`input[name="${prefix}"]:checked`); return el?parseFloat(el.value):0; }
+
+// Tabelas de conversão pontos → nota, por ano e semestre
+const convTables = {
+  '10º': {
+    s1: [{min:14.5,n:20},{min:13,n:19},{min:12.5,n:18},{min:12,n:17},{min:10,n:16},{min:9.5,n:15},{min:9,n:14},{min:7,n:13},{min:6.5,n:12},{min:5.5,n:11},{min:4.5,n:10},{min:3,n:9},{min:2.5,n:8},{min:2,n:7},{min:1.5,n:6},{min:1,n:5}],
+    s2: [{min:20,n:20},{min:19,n:19},{min:17.5,n:18},{min:15.5,n:17},{min:15,n:16},{min:14.5,n:15},{min:13.5,n:14},{min:11.5,n:13},{min:10.5,n:12},{min:10,n:11},{min:9.5,n:10},{min:7.5,n:9},{min:6.5,n:8},{min:5.5,n:7},{min:4.5,n:6},{min:3.5,n:5}]
+  },
+  '11º': {
+    s1: [{min:14.5,n:20},{min:13.5,n:19},{min:13,n:18},{min:12.5,n:17},{min:11.5,n:16},{min:10,n:15},{min:9.5,n:14},{min:7.5,n:13},{min:7,n:12},{min:6,n:11},{min:5,n:10},{min:3.5,n:9},{min:3,n:8},{min:2.5,n:7},{min:2,n:6},{min:1.5,n:5}],
+    s2: [{min:20.5,n:20},{min:19.5,n:19},{min:18,n:18},{min:16,n:17},{min:15.5,n:16},{min:15,n:15},{min:14,n:14},{min:12,n:13},{min:11.5,n:12},{min:11,n:11},{min:10.5,n:10},{min:8.5,n:9},{min:7.5,n:8},{min:6.5,n:7},{min:5.5,n:6},{min:4.5,n:5}]
+  },
+  '12º': {
+    s1: [{min:15,n:20},{min:14.5,n:19},{min:13.5,n:18},{min:13,n:17},{min:12,n:16},{min:11,n:15},{min:10,n:14},{min:8,n:13},{min:7.5,n:12},{min:6.5,n:11},{min:5.5,n:10},{min:4,n:9},{min:3.5,n:8},{min:3,n:7},{min:2.5,n:6},{min:2,n:5}],
+    s2: [{min:21,n:20},{min:20,n:19},{min:18.5,n:18},{min:17.5,n:17},{min:17,n:16},{min:16,n:15},{min:15,n:14},{min:13,n:13},{min:12.5,n:12},{min:12,n:11},{min:11.5,n:10},{min:9.5,n:9},{min:8.5,n:8},{min:7.5,n:7},{min:6.5,n:6},{min:5.5,n:5}]
+  },
+  '7º': {
+    pct: true,
+    s1: [{min:11,n:100},{min:10.5,n:94},{min:8,n:89},{min:7,n:80},{min:4,n:69},{min:3.5,n:60},{min:2.5,n:49},{min:2,n:39},{min:1.5,n:29},{min:1,n:19}],
+    s2: [{min:14.5,n:100},{min:14,n:94},{min:11.5,n:89},{min:11,n:80},{min:7.5,n:69},{min:7,n:60},{min:5.5,n:49},{min:5,n:39},{min:4.5,n:29},{min:4,n:19}]
+  },
+  '8º': {
+    pct: true,
+    s1: [{min:12,n:100},{min:11.5,n:94},{min:9,n:89},{min:8,n:80},{min:5.5,n:69},{min:4,n:60},{min:3,n:49},{min:2.5,n:39},{min:2,n:29},{min:1.5,n:19}],
+    s2: [{min:16,n:100},{min:15,n:94},{min:12.5,n:89},{min:12,n:80},{min:9,n:69},{min:8.5,n:60},{min:7,n:49},{min:6.5,n:39},{min:6,n:29},{min:5.5,n:19}]
+  },
+  '9º': {
+    pct: true,
+    s1: [{min:13.5,n:100},{min:13,n:94},{min:10.5,n:89},{min:9,n:80},{min:6,n:69},{min:4.5,n:60},{min:3.5,n:49},{min:3,n:39},{min:2.5,n:29},{min:2,n:19}],
+    s2: [{min:17,n:100},{min:16.5,n:94},{min:14.5,n:89},{min:14,n:80},{min:9.5,n:69},{min:9,n:60},{min:8,n:49},{min:7.5,n:39},{min:7,n:29},{min:6.5,n:19}]
+  }
+};
+
+function getNote(pts, sem) {
+  const ano = document.getElementById('ano').value;
+  const table = convTables[ano];
+  if (!table) {
+    // fallback legacy
+    const legacy=[{min:14.5,n:20},{min:13,n:19},{min:12.5,n:18},{min:12,n:17},{min:10,n:16},{min:9.5,n:15},{min:9,n:14},{min:7,n:13},{min:6.5,n:12},{min:5.5,n:11},{min:4.5,n:10},{min:3,n:9},{min:2.5,n:8},{min:2,n:7},{min:1.5,n:6},{min:1,n:5}];
+    for(const r of legacy){ if(pts>=r.min) return r.n; } return 0;
+  }
+  const rows = sem === 2 ? table.s2 : table.s1;
+  for(const r of rows){ if(pts>=r.min) return r.n; }
+  return 5;
+}
+
+function toggleQuadro() {
+  const body = document.getElementById('quadro-body');
+  const chev = document.getElementById('quadro-chevron');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chev.textContent = open ? '▼' : '▶';
+}
+function getRadioVal(prefix) { const el=document.querySelector(`input[name="${prefix}"]:checked`); return el?parseFloat(el.value):0; }
+
+function sumActivityRows(prefix, nRows, sem) {
+  let best=[];
+  for(let i=0;i<nRows;i++){
+    const el=document.getElementById(`${prefix}${i}-s${sem}`);
+    best.push(el ? (parseFloat(el.value)||0) : 0);
+  }
+  return best;
+}
+
+function sumFitescola(sem) {
+  let sum=0;
+  fitescolaTests.forEach((_,i)=>{ const el=document.getElementById(`fit-${i}-s${sem}`); if(el&&el.value!=='') sum+=parseFloat(el.value)||0; });
+  return Math.min(sum,5);
+}
+
+// Regras por ano letivo para atividades físicas
+const anoRules = {
+  '7º':  { s1n:2, s1max:4.5,  s2jdc:1, s2gin:1, s2are:0, s2out:3, s2max:8    },
+  '8º':  { s1n:3, s1max:5.5,  s2jdc:1, s2gin:1, s2are:0, s2out:4, s2max:9.5  },
+  '9º':  { s1n:3, s1max:7,    s2jdc:2, s2gin:1, s2are:1, s2out:2, s2max:10.5 },
+  '10º': { s1n:3, s1max:8,    s2jdc:2, s2gin:1, s2are:1, s2out:2, s2max:13.5 },
+  '11º': { s1n:3, s1max:8,    s2jdc:2, s2gin:1, s2are:1, s2out:2, s2max:14   },
+  '12º': { s1n:3, s1max:8,    s2jdc:2, s2gin:1, s2are:1, s2out:2, s2max:14.5 },
+};
+
+function getAnoRule() {
+  const ano = document.getElementById('ano').value;
+  return anoRules[ano] || null;
+}
+
+function updateSec2Note() {
+  const rule = getAnoRule();
+  const el = document.getElementById('sec2-rules-note');
+  const ano = document.getElementById('ano').value;
+  if (!rule) {
+    el.textContent = 'Seleciona o ano no cabeçalho para ver as regras de cálculo.';
+    return;
+  }
+  const areCountsAsOutras = (ano === '7º' || ano === '8º');
+  let s2parts = [];
+  if (rule.s2jdc > 0) s2parts.push(`${rule.s2jdc} JDC`);
+  if (rule.s2gin > 0) s2parts.push('Gin');
+  if (areCountsAsOutras) {
+    s2parts.push(`${rule.s2out} Dança ou Outras`);
+  } else {
+    if (rule.s2are > 0) s2parts.push('Dança');
+    if (rule.s2out > 0) s2parts.push(`${rule.s2out} Outras`);
+  }
+  const s2total = rule.s2jdc + rule.s2gin + (areCountsAsOutras ? rule.s2out : rule.s2are + rule.s2out);
+  el.textContent = `${ano} — 1º semestre: ${rule.s1n} melhores matérias · máximo ${rule.s1max} pts  |  2º semestre: ${s2total} melhores matérias (${s2parts.join(', ')}) · máximo ${rule.s2max} pts`;
+  document.getElementById('label-total1-1s').textContent = `Total Pontos 1º Semestre (máx. ${rule.s1max})`;
+  document.getElementById('label-total1-2s').textContent = `Total Pontos 2º Semestre (máx. ${rule.s2max})`;
+  document.getElementById('label-total1-nfal').textContent = `Total Pontos Final de Ano Letivo — valor do 2º semestre (máx. ${rule.s2max})`;
+  const max1s = (5 + rule.s1max + 1.5).toFixed(1).replace(/\.0$/, '');
+  const max2s = (5 + rule.s2max + 1.5).toFixed(1).replace(/\.0$/, '');
+  document.getElementById('label-total4-1s').textContent = `Total Pontos 1º Semestre — Ap. Física, At. Físicas e Questão (máx. ${max1s})`;
+  document.getElementById('label-total4-2s').textContent = `Total Pontos 2º Semestre — Ap. Física, At. Físicas e Questão (máx. ${max2s})`;
+}
+
+function calcAtividades() {
+  const rule = getAnoRule();
+
+  // Recolher valores por grupo
+  function getGroupVals(prefix, n) {
+    const vals = [];
+    for (let i = 0; i < n; i++) {
+      const el = document.getElementById(`${prefix}${i}-s1`);
+      const el2 = document.getElementById(`${prefix}${i}-s2`);
+      vals.push({ s1: el ? (parseFloat(el.value)||0) : 0, s2: el2 ? (parseFloat(el2.value)||0) : 0 });
+    }
+    return vals;
+  }
+
+  const jdcVals = getGroupVals('jdc', jdcActivities.length);
+  const gadVals = getGroupVals('gad', gadActivities.length);
+  const areVals = getGroupVals('are', areActivities.length);
+  const outVals = getGroupVals('out', outrasActivities.length);
+
+  // --- 1º SEMESTRE: N melhores de todas, cap global ---
+  const all1 = [...jdcVals,...gadVals,...areVals,...outVals].map(v=>v.s1).filter(v=>v>0).sort((a,b)=>b-a);
+  let t1_1s = 0;
+  if (rule) {
+    t1_1s = Math.min(all1.slice(0, rule.s1n).reduce((a,b)=>a+b, 0), rule.s1max);
+  } else {
+    t1_1s = all1.slice(0, 3).reduce((a,b)=>a+b, 0);
+  }
+
+  // --- 2º SEMESTRE: melhores por grupo com caps, depois teto global ---
+  let t1_2s = 0;
+  if (rule) {
+    function bestN(vals, n) {
+      return vals.map(v=>v.s2).filter(v=>v>0).sort((a,b)=>b-a).slice(0,n).reduce((a,b)=>a+b,0);
+    }
+    const ano = document.getElementById('ano').value;
+    const areCountsAsOutras = (ano === '7º' || ano === '8º');
+    const outValsEffective = areCountsAsOutras ? [...outVals, ...areVals] : outVals;
+    const jdc2 = bestN(jdcVals, rule.s2jdc);
+    const gin2 = bestN(gadVals, rule.s2gin);
+    const are2 = areCountsAsOutras ? 0 : bestN(areVals, rule.s2are);
+    const out2 = bestN(outValsEffective, rule.s2out);
+    t1_2s = Math.min(jdc2 + gin2 + are2 + out2, rule.s2max);
+  } else {
+    const all2 = [...jdcVals,...gadVals,...areVals,...outVals].map(v=>v.s2).filter(v=>v>0);
+    t1_2s = all2.reduce((a,b)=>a+b, 0);
+  }
+
+  return { t1_1s, t1_2s };
+}
+
+function calcAll() {
+  updateSec2Note();
+  const { t1_1s, t1_2s } = calcAtividades();
+  const act1sHasData = [...jdcActivities,...gadActivities,...areActivities,...outrasActivities].some((_,i,a)=>{
+    const prefixes=['jdc','gad','are','out'];
+    const grp=[jdcActivities,gadActivities,areActivities,outrasActivities];
+    for(let g=0;g<grp.length;g++) for(let j=0;j<grp[g].length;j++){
+      const el=document.getElementById(`${prefixes[g]}${j}-s1`); if(el&&parseFloat(el.value)>0) return true;
+    } return false;
+  });
+  const act2sHasData = [...jdcActivities,...gadActivities,...areActivities,...outrasActivities].some((_,i,a)=>{
+    const prefixes=['jdc','gad','are','out'];
+    const grp=[jdcActivities,gadActivities,areActivities,outrasActivities];
+    for(let g=0;g<grp.length;g++) for(let j=0;j<grp[g].length;j++){
+      const el=document.getElementById(`${prefixes[g]}${j}-s2`); if(el&&parseFloat(el.value)>0) return true;
+    } return false;
+  });
+  document.getElementById('total1-1s').textContent = act1sHasData ? t1_1s.toFixed(1) : '—';
+  document.getElementById('total1-2s').textContent = act2sHasData ? t1_2s.toFixed(1) : '—';
+  document.getElementById('total1-nfal').textContent = act2sHasData ? t1_2s.toFixed(1) : '—';
+  const fit_1s=sumFitescola(1); const fit_2s=sumFitescola(2);
+  const fit1sHasData = fitescolaTests.some((_,i) => { const el=document.getElementById(`fit-${i}-s1`); return el && el.value!==''; });
+  const fit2sHasData = fitescolaTests.some((_,i) => { const el=document.getElementById(`fit-${i}-s2`); return el && el.value!==''; });
+  document.getElementById('total2-1s').textContent = fit1sHasData ? fit_1s.toFixed(1) : '—';
+  document.getElementById('total2-2s').textContent = fit2sHasData ? fit_2s.toFixed(1) : '—';
+  document.getElementById('total2-media').textContent = (fit1sHasData && fit2sHasData) ? ((fit_1s + fit_2s) / 2).toFixed(2) : '—';
+  const ano789q = ['7º','8º','9º'].includes(document.getElementById('ano').value);
+  document.getElementById('questao-nota-label').textContent = ano789q ? 'Nota obtida (0–100)' : 'Nota obtida (0–20)';
+  document.getElementById('questao-nota-s1').max = ano789q ? 100 : 20;
+  document.getElementById('questao-nota-s2').max = ano789q ? 100 : 20;
+  function notaToQPts(n){ if(n===null) return 0; if(ano789q){ if(n>=75) return 1.5; if(n>=67.5) return 1; if(n>=47.5) return 0.5; return 0; } else { if(n>=17.5) return 1.5; if(n>=13.5) return 1; if(n>=9.5) return 0.5; return 0; } }
+  document.getElementById('questao-ref-line').innerHTML = ano789q ? '≥75% → 1,5 pts &nbsp;|&nbsp; ≥67,5% → 1 pt &nbsp;|&nbsp; ≥47,5% → 0,5 pts &nbsp;|&nbsp; &lt;47,5% → 0 pts' : '≥17,5 → 1,5 pts &nbsp;|&nbsp; ≥13,5 → 1 pt &nbsp;|&nbsp; ≥9,5 → 0,5 pts &nbsp;|&nbsp; &lt;9,5 → 0 pts';
+  const q1raw=document.getElementById('questao-nota-s1').value; const q2raw=document.getElementById('questao-nota-s2').value;
+  const q1nota=q1raw!==''?parseFloat(q1raw.replace(',','.')):null; const q2nota=q2raw!==''?parseFloat(q2raw.replace(',','.')):null;
+  const t3_1s=notaToQPts(q1nota); const t3_2s=notaToQPts(q2nota);
+  document.getElementById('questao-pts-s1').textContent=q1nota!==null?t3_1s+' pts':'—';
+  document.getElementById('questao-pts-s2').textContent=q2nota!==null?t3_2s+' pts':'—';
+  document.getElementById('total3-1s').textContent = q1nota!==null ? t3_1s.toFixed(1) : '—';
+  document.getElementById('total3-2s').textContent = q2nota!==null ? t3_2s.toFixed(1) : '—';
+  const t3mediaEl=document.getElementById('total3-media');
+  if(q1nota!==null && q2nota!==null){ t3mediaEl.textContent=((t3_1s+t3_2s)/2).toFixed(2); }
+  else if(q1nota!==null){ t3mediaEl.textContent=t3_1s.toFixed(2); }
+  else { t3mediaEl.textContent='—'; }
+  // Total 4 1ºS: só mostra se houver pelo menos algum dado no semestre
+  const has1s = fit1sHasData || act1sHasData || q1nota!==null;
+  const t4_1s = fit_1s + t1_1s + t3_1s;
+  document.getElementById('total4-1s').textContent = has1s ? t4_1s.toFixed(1) : '—';
+
+  // Total Pontos 2º Semestre = soma das Notas Finais de Ano dos 3 parâmetros (em pontos)
+  const fit_media_raw = document.getElementById('total2-media').textContent;
+  const af_nfal_raw   = document.getElementById('total1-nfal').textContent;
+  const qa_media_raw  = document.getElementById('total3-media').textContent;
+  const fit_media  = fit_media_raw  !== '—' ? parseFloat(fit_media_raw)  : null;
+  const af_nfal    = af_nfal_raw    !== '—' ? parseFloat(af_nfal_raw)    : null;
+  const qa_media   = qa_media_raw   !== '—' ? parseFloat(qa_media_raw)   : null;
+  const t4_2s = (fit_media !== null && af_nfal !== null && qa_media !== null)
+    ? fit_media + af_nfal + qa_media : null;
+  document.getElementById('total4-2s').textContent = t4_2s !== null ? t4_2s.toFixed(1) : '—';
+
+  // Nota C&A 1ºS e Nota C&A Ano Letivo
+  const avcc_1s = has1s ? getNote(t4_1s, 1) : null;
+  const avcc_2s = t4_2s !== null ? getNote(t4_2s, 2) : null;
+  const isPct = !!(convTables[document.getElementById('ano').value] && convTables[document.getElementById('ano').value].pct);
+  document.getElementById('total5-1s').textContent = avcc_1s ? (isPct ? avcc_1s + '%' : avcc_1s) : '—';
+  document.getElementById('total5-2s').textContent = avcc_2s ? (isPct ? avcc_2s + '%' : avcc_2s) : '—';
+
+  const t6_1s = avcc_1s ? (avcc_1s * 0.85) : null;
+  const t6_2s = avcc_2s ? (avcc_2s * 0.85) : null;
+  const resp1s=getRadioAtVal('resp-s1'); const exig1s=getRadioAtVal('exig-s1');
+  const resp2s=getRadioAtVal('resp-s2'); const exig2s=getRadioAtVal('exig-s2');
+  const at1sSelected = !!document.querySelector('input[name="resp-s1"]:checked') || !!document.querySelector('input[name="exig-s1"]:checked');
+  const at2sSelected = !!document.querySelector('input[name="resp-s2"]:checked') || !!document.querySelector('input[name="exig-s2"]:checked');
+  const t7_1s=resp1s+exig1s; const t7_2s=resp2s+exig2s;
+  document.getElementById('total7-1s').textContent = at1sSelected ? t7_1s : '—';
+  document.getElementById('total7-2s').textContent = at2sSelected ? t7_2s : '—';
+  const t8_1s=t7_1s*0.15; const t8_2s=t7_2s*0.15;
+  const bothAt = at1sSelected && at2sSelected;
+  document.getElementById('total8-media').textContent = bothAt ? ((t7_1s+t7_2s)/2).toFixed(2) : '—';
+
+  // Autoavaliação 1º Semestre: usa o que estiver disponível, tratando 0 para o que faltar
+  const cc1s = avcc_1s !== null ? avcc_1s : 0;
+  const av1s = at1sSelected ? t7_1s : 0;
+  const fn1s = (avcc_1s !== null || at1sSelected) ? (cc1s * 0.85 + av1s * 0.15) : null;
+
+  // Autoavaliação 2º Semestre: usa o que estiver disponível
+  const cc2s = avcc_2s !== null ? avcc_2s : 0;
+  const atMedia = bothAt ? (t7_1s + t7_2s) / 2 : (at1sSelected ? t7_1s : (at2sSelected ? t7_2s : 0));
+  const atHasAny = at1sSelected || at2sSelected;
+  const fn2s = (avcc_2s !== null || atHasAny) ? (cc2s * 0.85 + atMedia * 0.15) : null;
+
+  document.getElementById('final-1s').textContent=fn1s!==null?Math.round(fn1s):'—';
+  document.getElementById('final-2s').textContent=fn2s!==null?Math.round(fn2s):'—';
+  const ano789 = ['7º','8º','9º'].includes(document.getElementById('ano').value);
+  const subText = ano789 ? 'Percentagem (0–100)' : 'valores (0–20)';
+  document.getElementById('final-sub-1s').textContent = subText;
+  document.getElementById('final-sub-2s').textContent = subText;
+}
+
+jdcActivities.forEach((a,i)=>buildActivityRow(document.getElementById('jdc-rows'),a,`jdc${i}`,false));
+gadActivities.forEach((a,i)=>buildActivityRow(document.getElementById('gad-rows'),a,`gad${i}`,false));
+areActivities.forEach((a,i)=>buildActivityRow(document.getElementById('are-rows'),a,`are${i}`,false));
+outrasActivities.forEach((a,i)=>buildActivityRow(document.getElementById('outras-rows'),a,`out${i}`,false));
+fitescolaTests.forEach((t,i)=>buildFitescolaRow(document.getElementById('fitescola-rows'),t,i));
+
+buildAtitudesRows('resp-rows', getAtOpts(respOptsBase), 'resp');
+buildAtitudesRows('exig-rows', getAtOpts(exigOptsBase), 'exig');
+calcAll();
+document.getElementById('ano').addEventListener('change', () => { rebuildAtitudes(); calcAll(); });
+
+// ——— EmailJS config — preencher com os seus dados ———
+const EMAILJS_PUBLIC_KEY  = 'COLE_AQUI_A_SUA_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID  = 'COLE_AQUI_O_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = 'COLE_AQUI_O_TEMPLATE_ID';
+
+emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+function fecharModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+function prepararEnvio() {
+  const nome = document.getElementById('nome').value.trim();
+  if (!nome) { alert('Por favor preenche o teu nome antes de enviar.'); return; }
+  const ano = document.getElementById('ano').value;
+  const turma = document.getElementById('turma').value;
+  document.getElementById('modal-msg').textContent =
+    `A autoavaliação de ${nome} (${ano}º ${turma}) será enviada em PDF para o professor.`;
+  document.getElementById('modal-overlay').classList.add('active');
+  document.getElementById('modal-confirmar').onclick = enviarAutoAvaliacao;
+}
+
+function gerarPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const nome      = document.getElementById('nome').value || '—';
+  const ano       = document.getElementById('ano').value || '—';
+  const turma     = document.getElementById('turma').value || '—';
+  const anolet    = document.getElementById('anoletivo').value || '—';
+  const data      = document.getElementById('data').value || '—';
+
+  // Cabeçalho
+  doc.setFillColor(29, 78, 216);
+  doc.rect(0, 0, 210, 28, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(16);
+  doc.text('Ficha de Autoavaliação — Educação Física', 105, 11, {align:'center'});
+  doc.setFontSize(11);
+  doc.setFont('helvetica','normal');
+  doc.text('Escola Secundária Du Bocage', 105, 20, {align:'center'});
+
+  // Dados do aluno
+  doc.setTextColor(30,30,30);
+  doc.setFillColor(240,244,255);
+  doc.rect(10, 32, 190, 22, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('DADOS DO ALUNO', 14, 39);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  doc.text(`Nome: ${nome}`, 14, 46);
+  doc.text(`Ano: ${ano}   Turma: ${turma}   Ano letivo: ${anolet}   Data: ${data}`, 14, 52);
+
+  let y = 60;
+
+  function sectionTitle(title, num) {
+    doc.setFillColor(219,234,254);
+    doc.rect(10, y, 190, 7, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(29,78,216);
+    doc.text((num ? num + '  ' : '') + title.toUpperCase(), 14, y+5);
+    doc.setTextColor(30,30,30);
+    y += 9;
+  }
+
+  function row2(label, v1, v2) {
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.text(label, 14, y);
+    doc.text(String(v1), 130, y, {align:'center'});
+    doc.text(String(v2), 170, y, {align:'center'});
+    y += 6;
+  }
+
+  function colHeaders() {
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(100,100,100);
+    doc.text('1º Semestre', 130, y, {align:'center'});
+    doc.text('2º Semestre', 170, y, {align:'center'});
+    doc.setTextColor(30,30,30);
+    y += 5;
+  }
+
+  // Secção 1 — FITescola
+  sectionTitle('Domínio dos Conhecimentos e Capacidades — Aptidão Física', '1.1');
+  colHeaders();
+  const fitLabels = ['Vai-Vem','Abdominais','Flexões de braços','Senta e alcança','Agilidade'];
+  const fitMap = {'':'—','0':'PM','0.5':'ZS','1':'PA'};
+  fitescolaTests.forEach((_,i)=>{
+    const v1 = document.getElementById(`fit-${i}-s1`)?.value ?? '';
+    const v2 = document.getElementById(`fit-${i}-s2`)?.value ?? '';
+    row2(fitLabels[i], fitMap[v1]||'—', fitMap[v2]||'—');
+  });
+  const fit1s = document.getElementById('total2-1s').textContent;
+  const fit2s = document.getElementById('total2-2s').textContent;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text(`Total 1 — 1ºS: ${fit1s}   |   Total 1 — 2ºS: ${fit2s}`, 14, y); y += 8;
+
+  // Secção 2 — Atividades
+  sectionTitle('Domínio dos Conhecimentos e Capacidades — Atividades Físicas', '1.2');
+  colHeaders();
+  const ieaMap = {'0':'—','1':'I','2':'E','3':'A'};
+  const allActs = [
+    ...jdcActivities.map((a,i)=>({label:a,prefix:`jdc${i}`})),
+    ...gadActivities.map((a,i)=>({label:a,prefix:`gad${i}`})),
+    ...areActivities.map((a,i)=>({label:a,prefix:`are${i}`})),
+    ...outrasActivities.map((a,i)=>({label:a,prefix:`out${i}`})),
+  ];
+  allActs.forEach(({label,prefix})=>{
+    const v1 = document.getElementById(`${prefix}-s1`)?.value ?? '0';
+    const v2 = document.getElementById(`${prefix}-s2`)?.value ?? '0';
+    if(v1!=='0'||v2!=='0') row2(label, ieaMap[v1]||'—', ieaMap[v2]||'—');
+  });
+  const t2_1s = document.getElementById('total1-1s').textContent;
+  const t2_2s = document.getElementById('total1-2s').textContent;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text(`Total 2 — 1ºS: ${t2_1s}   |   Total 2 — 2ºS: ${t2_2s}`, 14, y); y += 8;
+
+  // Secção 3 — Questão de aula
+  sectionTitle('Questão de Aula', '1.3');
+  const q1s = document.getElementById('total3-1s').textContent;
+  const q2s = document.getElementById('total3-2s').textContent;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text(`1º Semestre: ${q1s} pts   |   2º Semestre: ${q2s} pts`, 14, y); y += 8;
+
+  // Resumo C&C
+  sectionTitle('Conhecimentos e Capacidades — Resumo', '');
+  const fields = [
+    ['Total 4 (1+2+3)', 'total4-1s','total4-2s'],
+    ['Nota C&C (Av.)', 'total5-1s','total5-2s'],
+    ['Nota C&A 1º Semestre', 'total5-1s','total5-2s'],
+  ];
+  colHeaders();
+  fields.forEach(([lbl,id1,id2])=>{
+    row2(lbl, document.getElementById(id1)?.textContent||'—', document.getElementById(id2)?.textContent||'—');
+  }); y += 2;
+
+  // Secção 7 — Atitudes
+  sectionTitle('Atitudes e Valores (15%)', '2');
+  colHeaders();
+  row2('Responsabilidade e integridade',
+    document.querySelector('input[name="resp-s1"]:checked')?.value||'—',
+    document.querySelector('input[name="resp-s2"]:checked')?.value||'—');
+  row2('Exigência e excelência',
+    document.querySelector('input[name="exig-s1"]:checked')?.value||'—',
+    document.querySelector('input[name="exig-s2"]:checked')?.value||'—');
+  const t7_1 = document.getElementById('total7-1s').textContent;
+  const t7_2 = document.getElementById('total7-2s').textContent;
+  const t8_1 = document.getElementById('total8-1s').textContent;
+  const t8_2 = document.getElementById('total8-2s').textContent;
+  doc.setFont('helvetica','bold');
+  doc.text(`Total 7 — 1ºS: ${t7_1}   |   2ºS: ${t7_2}`, 14, y); y+=6;
+  doc.text(`Total 8 (×15%) — 1ºS: ${t8_1}   |   2ºS: ${t8_2}`, 14, y); y+=10;
+
+  // Nota Final
+  doc.setFillColor(29,78,216);
+  doc.rect(10, y, 190, 20, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold'); doc.setFontSize(13);
+  const fn1 = document.getElementById('final-1s').textContent;
+  const fn2 = document.getElementById('final-2s').textContent;
+  doc.text(`NOTA FINAL — 1º Semestre: ${fn1}     2º Semestre: ${fn2}`, 105, y+13, {align:'center'});
+
+  // Rodapé
+  doc.setTextColor(150,150,150);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text(`${new Date().toLocaleDateString('pt-PT')}`, 105, 292, {align:'center'});
+
+  return doc.output('datauristring');
+}
+
+function enviarAutoAvaliacao() {
+  fecharModal();
+  const btn = document.getElementById('btn-enviar');
+  const status = document.getElementById('status-envio');
+  btn.disabled = true;
+  btn.textContent = '⏳ A gerar PDF e enviar…';
+  btn.style.background = '#64748b';
+  status.style.display = 'block';
+  status.style.color = '#64748b';
+  status.textContent = 'A preparar o PDF…';
+
+  const nome    = document.getElementById('nome').value || 'Aluno';
+  const ano     = document.getElementById('ano').value || '';
+  const turma   = document.getElementById('turma').value || '';
+  const anolet  = document.getElementById('anoletivo').value || '';
+
+  let pdfData;
+  try { pdfData = gerarPDF(); }
+  catch(e) {
+    status.style.color='#dc2626';
+    status.textContent = 'Erro ao gerar o PDF: ' + e.message;
+    btn.disabled=false; btn.textContent='📤 Enviar Auto-Avaliação para o Professor'; btn.style.background='#1d4ed8';
+    return;
+  }
+
+  status.textContent = 'A enviar email…';
+
+  const fn1 = document.getElementById('final-1s').textContent;
+  const fn2 = document.getElementById('final-2s').textContent;
+
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    aluno_nome:  nome,
+    aluno_ano:   `${ano}º ${turma}`,
+    ano_letivo:  anolet,
+    nota_1s:     fn1,
+    nota_2s:     fn2,
+    pdf_base64:  pdfData,
+    data_envio:  new Date().toLocaleDateString('pt-PT'),
+  }).then(() => {
+    btn.style.background = '#16a34a';
+    btn.textContent = '✅ Autoavaliação enviada com sucesso!';
+    status.style.color = '#16a34a';
+    status.textContent = 'PDF enviado com sucesso!';
+  }).catch(err => {
+    btn.disabled = false;
+    btn.style.background = '#dc2626';
+    btn.textContent = '❌ Erro no envio — tenta novamente';
+    status.style.color = '#dc2626';
+    status.textContent = 'Erro: ' + (err?.text || JSON.stringify(err));
+    setTimeout(()=>{ btn.style.background='#1d4ed8'; btn.textContent='📤 Enviar Auto-Avaliação para o Professor'; }, 4000);
+  });
+}
+</script>
+</body>
+</html>
