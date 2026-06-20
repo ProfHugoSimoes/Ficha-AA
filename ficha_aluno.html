@@ -594,7 +594,7 @@ async function init(){
       const params = new URLSearchParams(window.location.search);
       const codeParam = params.get('c');
       const qrUrl = codeParam
-        ? `https://bjecas79.github.io/Ficha-AA/ficha_aluno.html?c=${codeParam}`
+        ? `${window.location.origin}${window.location.pathname}?c=${codeParam}`
         : window.location.href;
       qrDiv.innerHTML='';
       new QRCode(qrDiv, {
