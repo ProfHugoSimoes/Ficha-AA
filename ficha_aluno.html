@@ -534,30 +534,38 @@ async function init(){
     const { data: fichas } = await supa.from('fichas_aa').select('nome_aluno,updated_at').eq('user_id', userId).eq('turma_id', turmaId).eq('semestre', semestre).eq('ano_letivo', G.anoLetivo);
     const submetidos = new Set((fichas||[]).map(f=>f.nome_aluno));
 
-    // Carregar dados de avaliação — busca o campo 'dados' completo para garantir
-    // compatibilidade com todas as versões do Supabase JS (o operador -> pode devolver
-    // null dependendo da versão do cliente). Extrai avaliacao em JS.
+    // Carregar apenas os campos de avaliação necessários (não o JSON completo) —
+    // usa os mesmos operadores -> já usados para as turmas, para reduzir o egress
+    // do Supabase (cada aluno só precisa de 4 chaves pequenas, não do dossier todo).
     let avalObj = {};
-    if(G.anoLetivo){
-      const { data: avalRow } = await supa.from('dossier_data')
-        .select('dados')
-        .eq('user_id', userId)
-        .eq('ano_letivo', G.anoLetivo)
-        .maybeSingle();
-      if(avalRow?.dados?.avaliacao) avalObj = avalRow.dados.avaliacao;
-    }
-    // fallback: último registo disponível
-    if(!Object.keys(avalObj).length){
-      const { data: avalAny } = await supa.from('dossier_data')
-        .select('dados')
-        .eq('user_id', userId)
-        .order('ano_letivo', {ascending:false}).limit(1).maybeSingle();
-      if(avalAny?.dados?.avaliacao) avalObj = avalAny.dados.avaliacao;
-    }
     // fitescola 1ºS: tabela Fitescola 1ºS
     const fitKey1s = `${turmaId}__fitescola1s`;
     // fitescola 2ºS: tabela Fitescola 2ºS (só relevante no semestre 2)
     const fitKey2s = `${turmaId}__fitescola2s`;
+    const avalSelect = `dados->avaliacao->${avalKey1},dados->avaliacao->${avalKey2},dados->avaliacao->${fitKey1s},dados->avaliacao->${fitKey2s}`;
+    function mergeAval(row){
+      if(!row) return;
+      if(row[avalKey1])  avalObj[avalKey1]  = row[avalKey1];
+      if(row[avalKey2])  avalObj[avalKey2]  = row[avalKey2];
+      if(row[fitKey1s])  avalObj[fitKey1s]  = row[fitKey1s];
+      if(row[fitKey2s])  avalObj[fitKey2s]  = row[fitKey2s];
+    }
+    if(G.anoLetivo){
+      const { data: avalRow } = await supa.from('dossier_data')
+        .select(avalSelect)
+        .eq('user_id', userId)
+        .eq('ano_letivo', G.anoLetivo)
+        .maybeSingle();
+      mergeAval(avalRow);
+    }
+    // fallback: último registo disponível
+    if(!Object.keys(avalObj).length){
+      const { data: avalAny } = await supa.from('dossier_data')
+        .select(avalSelect)
+        .eq('user_id', userId)
+        .order('ano_letivo', {ascending:false}).limit(1).maybeSingle();
+      mergeAval(avalAny);
+    }
     G.fitDados1s  = avalObj[fitKey1s]?.resultados || {};
     G.fitDados    = semestre===2 ? (avalObj[fitKey2s]?.resultados || {}) : G.fitDados1s;
     G.avalDados1s = avalObj[avalKey1] || {};
