@@ -647,6 +647,7 @@ function renderAlunosGrid(lista){
 }
 
 function filtrarAlunos(){
+  if(!G.alunosList) return; // dados ainda não carregaram — ignorar
   const q = (document.getElementById('listaSearch').value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   if(!q){ renderAlunosGrid(G.alunosList); return; }
   const filtered = G.alunosList.filter(a=>{
